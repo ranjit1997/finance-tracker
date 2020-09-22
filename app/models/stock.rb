@@ -1,9 +1,13 @@
-class Stock
+class Stock < ApplicationRecord
 
   def self.new_lookup(ticker_symbol)
     client = IEX::Api::Client.new(publishable_token: Rails.application.credentials.config[:iex_client][:sendbox_api_key],
 
-                                  endpoint: 'https://sandbox.iexapis.com/stable')
-    client.price(ticker_symbol)                              
+                                  endpoint: 'https://sandbox.iexapis.com/stable') 
+    begin
+      new(ticker: ticker_symbol, name: client.company(ticker_symbol).company_name, last_price: client.price(ticker_symbol))
+    rescue => exception
+      return nil
+    end                                                            
   end  
 end
